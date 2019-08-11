@@ -1,4 +1,50 @@
 <?php
+ini_set('max_execution_time', 0); // 0 = Unlimited
+
+require_once('./lib/simple_html_dom.php');
+
+class DocxConversion{
+
+    private $filename;
+
+    public function __construct($filePath) {
+        $this->filename = $filePath;
+    }
+
+    public function read_docx(){
+        $zip = new ZipArchive;
+        if (true === $zip->open($this->filename)) {
+            // If successful, search for the data file in the archive
+            if (($index = $zip->locateName("word/document.xml")) !== false) {
+                // Index found! Now read it to a string
+                $text = $zip->getFromIndex($index);
+                $html = new simple_html_dom();
+                $html->load($text);
+
+                //var_dump($html);
+            }
+        }
+
+        $zip->close();
+        //var_dump($dom->root->first_child()->children[1]->nodes);
+        return $html->root->first_child()->children[1];
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Check if the form was submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Check if file was uploaded without errors
@@ -15,39 +61,23 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $maxsize = 5 * 1024 * 1024;
         if($filesize > $maxsize) die("Error: File size is larger than the allowed limit.");
 
-            // Check whether file exists before uploading it
-            if(file_exists("upload/" . $filename)){
-                echo $filename . " is already exists.";
-            } else{
-                move_uploaded_file($_FILES["photo"]["tmp_name"], "upload/" . $filename);
-                echo "Your file was uploaded successfully.";
+            move_uploaded_file($_FILES["photo"]["tmp_name"], "upload/" . $filename);
+            echo "Your file was uploaded successfully.";
 
-                 //unzip
-                $dir = "./upload/temp/";
-                $target_file = "upload/" . $filename;
-                $docxUncompressedFile = $dir.'word/document.xml';
+             //unzip
+            $docObj = new DocxConversion("upload/" . $filename);
+            $node = $docObj->read_docx();
 
-                // get the absolute path to $file
-                $path = pathinfo(realpath($target_file), PATHINFO_DIRNAME);
-                $zip = new ZipArchive;
-                $res = $zip->open($target_file);
-                if ($res === TRUE) {
-                    $zip->extractTo($dir);
-                    $zip->close();
-
-                    echo $docxUncompressedFile;
-                    $xmldata = simplexml_load_file($docxUncompressedFile) or die("Failed to load");
-                    echo $xmldata;
-                    foreach($xmldata->children() as $line) {
-                        echo $line->firstname . ", ";
-                    }
-
-                } else {
-                    echo "Doh! I couldn't open $file";
+        /*
+                for ($i = 0; $i < count($node->nodes); $i++) {
+                    $node_child = $node->nodes[$i];
+                    print_r($node_child);
                 }
+        */
+
+            echo "termina";
 
 
-            }
         } else{
             echo "Error: There was a problem uploading your file. Please try again.";
         }
