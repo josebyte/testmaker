@@ -1,35 +1,31 @@
 <?php
+
 ini_set('max_execution_time', 0); // 0 = Unlimited
 
 require_once('./lib/simple_html_dom.php');
+require_once('./db.php');
 
-class DocxConversion{
+function readDocx($filePath) {
+    // Create new ZIP archive
+    $zip = new ZipArchive;
+    $dataFile = 'word/document.xml';
+    // Open received archive file
+    if (true === $zip->open($filePath)) {
+        // If done, search for the data file in the archive
+        if (($index = $zip->locateName($dataFile)) !== false) {
+            // If found, read it to the string
+            $zip_entry = $zip->getFromIndex($index);
+            $zip->close();
 
-    private $filename;
+            $xml = DOMDocument::loadXML($zip_entry, LIBXML_NOENT | LIBXML_XINCLUDE | LIBXML_NOERROR | LIBXML_NOWARNING);
+            $nodes = $xml->firstChild->firstChild;
 
-    public function __construct($filePath) {
-        $this->filename = $filePath;
-    }
-
-    public function read_docx(){
-        $zip = new ZipArchive;
-        if (true === $zip->open($this->filename)) {
-            // If successful, search for the data file in the archive
-            if (($index = $zip->locateName("word/document.xml")) !== false) {
-                // Index found! Now read it to a string
-                $text = $zip->getFromIndex($index);
-                $html = new simple_html_dom();
-                $html->load($text);
-
-                //var_dump($html);
-            }
+            return  $nodes;
         }
-
         $zip->close();
-        //var_dump($dom->root->first_child()->children[1]->nodes);
-        return $html->root->first_child()->children[1];
     }
-
+    // In case of failure return empty string
+    return "";
 }
 
 
@@ -64,16 +60,38 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             move_uploaded_file($_FILES["photo"]["tmp_name"], "upload/" . $filename);
             echo "Your file was uploaded successfully.";
 
-             //unzip
-            $docObj = new DocxConversion("upload/" . $filename);
-            $node = $docObj->read_docx();
+             //unzi
+            $nodes = readDocx("upload/" . $filename);
 
-        /*
-                for ($i = 0; $i < count($node->nodes); $i++) {
-                    $node_child = $node->nodes[$i];
-                    print_r($node_child);
+            //parse nodes
+
+            $question_id = 0;
+
+            foreach ($nodes->childNodes AS $item) {
+                $node_value = trim($item->nodeValue);
+
+                if (empty($node_value)) {
+                    continue;
                 }
-        */
+
+                //if is question:
+                $re = '/^\d+\./m';
+                preg_match_all($re, $node_value, $matches, PREG_SET_ORDER, 0);
+                if ($matches) {
+
+                } else {
+                    $re = '/^.+\)/m';
+
+                }
+
+
+
+                print $item->nodeName . " = " . $item->nodeValue . "<br>";
+            }
+
+            print_r($nodes);
+
+
 
             echo "termina";
 
