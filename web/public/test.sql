@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: mysql
--- Tiempo de generación: 12-08-2019 a las 22:25:19
+-- Tiempo de generación: 13-08-2019 a las 20:16:35
 -- Versión del servidor: 5.7.22
 -- Versión de PHP: 7.2.19
 
@@ -32,7 +32,7 @@ CREATE TABLE `answers` (
   `id` int(6) UNSIGNED NOT NULL,
   `question_id` int(6) UNSIGNED DEFAULT NULL,
   `answer` varchar(540) NOT NULL,
-  `isCorrect` int(1) DEFAULT NULL
+  `correct` int(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -44,7 +44,9 @@ CREATE TABLE `answers` (
 CREATE TABLE `questions` (
   `id` int(6) UNSIGNED NOT NULL,
   `test_id` int(6) UNSIGNED NOT NULL,
-  `question` varchar(540) DEFAULT NULL
+  `question` varchar(540) DEFAULT NULL,
+  `timesOk` int(6) DEFAULT '0',
+  `timesBad` int(6) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
