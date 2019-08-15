@@ -1,0 +1,56 @@
+<div class="container">
+
+  <mat-card>
+    <mat-card-content>
+      <mat-card-title translate>Test selector</mat-card-title>
+      <mat-card-subtitle>
+        <app-loader [isLoading]="isLoading" size="1.5"></app-loader>
+        <q [hidden]="isLoading">{{ quote }}</q>
+      </mat-card-subtitle>
+      <mat-card-content>
+
+        <form>
+
+          Stepper
+          <mat-horizontal-stepper #stepper fxLayout="column-reverse">
+            <ng-template matStepperIcon="edit">
+              <mat-icon svgIcon="check" class="survey-step-icon">
+                check
+              </mat-icon>
+            </ng-template>
+
+            <ng-template matStepperIcon="done">
+              <mat-icon svgIcon="check" class="survey-step-icon">
+                check
+              </mat-icon>
+            </ng-template>
+
+            <mat-step
+              *ngFor="let question of questions; let i = index"
+              [label]="i"
+              [stepControl]="formGroups[i]">
+              <div fxLayout="column" style="width: 80%; margin:0 auto;">
+                <div fxLayout="column" fxFlex="100%" fxLayoutGap="2em">
+
+                  <question
+                    [question]="question"
+                    (nextStep)="moveNext(stepper)">
+                  </question>
+
+                </div>
+              </div>
+            </mat-step>
+
+          </mat-horizontal-stepper>
+
+        </form>
+
+
+      </mat-card-content>
+      <mat-card-actions>
+
+      </mat-card-actions>
+    </mat-card-content>
+  </mat-card>
+
+</div>
