@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Upload Form</title>
+</head>
+<body>
+<form action="upload-manager.php" method="post" enctype="multipart/form-data">
+
+    <h2>Upload test</h2>
+
+    <fieldset>
+        <legend>Name:</legend>
+        <input name="name" type="text" placeholder="Test name" value="COMPLEMENTOS">
+    </fieldset>
+
+    <fieldset>
+        <legend>Different type questions from:</legend>
+        <input name="differentTypeFrom" type="number" placeholder="Different type from number" value="">
+    </fieldset>
+
+    <fieldset>
+        <legend>Number of answers for each question:</legend>
+        <input name="num_answers" type="number" placeholder="Número de respuestas por cada pregunta" value="3">
+    </fieldset>
+
+    <fieldset>
+        <legend>Allow different number of answers:</legend>
+        <input name="diff_amount_of_answers" type="text" placeholder="Allow different number of answers" value="1">
+    </fieldset>
+
+    <fieldset>
+        <legend>Allow duplicated questions:</legend>:</legend>
+        <input name="allow_dup" type="text" placeholder="Allow duplicated questions" value="1">
+    </fieldset>
+
+    <div>
+        <label for="fileSelect">Filename:</label>
+        <input type="file" name="file" id="fileSelect">
+        <input type="submit" name="submit" value="Upload">
+        <p><strong>Note:</strong> Only .docx format allowed to a max size of 5 MB.</p>
+    </div>
+
+</form>
+</body>
+</html>

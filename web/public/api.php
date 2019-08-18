@@ -1,7 +1,10 @@
 <?php
 require_once ('./MysqliDb.php');
 
-$db = new MysqliDb ('mysql', 'root', 'root', 'test');
+//$db = new MysqliDb ('mysql', 'root', 'root', 'test');
+$db = new MysqliDb ('localhost', 'id8151799_testsmaker', 'testsmaker', 'id8151799_testsmaker');
+
+
 $db->autoReconnect = false;
 
 $request_method=$_SERVER["REQUEST_METHOD"];
