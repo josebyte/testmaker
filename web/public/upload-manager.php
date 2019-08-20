@@ -119,9 +119,10 @@ function parseNodes($nodes) {
                 $new->appendChild($new->importNode($item, true));
                 $xpath = new DomXPath($new);
                 $highlight_ar = $xpath->query("//w:highlight");
+                $highlight_ar2 = $xpath->query("//w:shd");
 
                 $highlight = 0;
-                if($highlight_ar && count($highlight_ar) > 0){
+                if(($highlight_ar && count($highlight_ar) > 0) || ($highlight_ar2 && count($highlight_ar2) > 0) ){
                     $highlight = 1;
                 }
 
@@ -163,9 +164,9 @@ function showQuestions($test_id){
             if ($db->count > 0) {
                 foreach ($answers as $answer) {
                     if($answer["correct"] == 1){
-                        echo "<b>" . $answer["answer"] ."</b>";
+                        echo "<b>" . $answer["answer"] ."</b><br>";
                     }else{
-                        echo $answer["answer"];
+                        echo $answer["answer"] . "<br>";
                     }
                 }
             }
