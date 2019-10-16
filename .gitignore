@@ -24,3 +24,7 @@ nbproject/
 # SSL Certs
 etc/ssl/
 .idea/
+
+*.docx
+
+*.sql

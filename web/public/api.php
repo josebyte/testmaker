@@ -1,8 +1,12 @@
 <?php
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token");
+
 require_once ('./MysqliDb.php');
 
-//$db = new MysqliDb ('mysql', 'root', 'root', 'test');
-$db = new MysqliDb ('localhost', 'id8151799_testsmaker', 'testsmaker', 'id8151799_testsmaker');
+$db = new MysqliDb ('mysql', 'root', 'root', 'test');
+//$db = new MysqliDb ('localhost', 'id8151799_testsmaker', 'testsmaker', 'id8151799_testsmaker');
 
 
 $db->autoReconnect = false;
@@ -20,7 +24,14 @@ switch($request_method)
         }
         else
         {
-            get_tests();
+            if(!empty($_GET["question_id"])){
+                $question_id = intval($_GET["question_id"]);
+                $value = $_GET["value"];
+                add_answer($question_id, $value);
+            }else{
+                get_tests();
+            }
+
         }
         break;
     case 'PUT':
@@ -40,8 +51,6 @@ function get_tests()
 {
     global $db;
     $tests = $db->get('tests');
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *');
     echo json_encode($tests);
 }
 
@@ -59,8 +68,6 @@ function get_test($id)
         }
     }
 
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *');
     echo json_encode($questions);
 
 }
@@ -81,8 +88,5 @@ function add_answer($question_id, $value){
     $db->where ('id', $question_id);
     $db->update ('questions', $data);
 
-
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *');
     echo json_encode(array($db->count));
 }

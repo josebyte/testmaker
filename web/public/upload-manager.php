@@ -49,6 +49,8 @@ function parseNodes($nodes) {
     $DIFF_AMOUNT_OF_ANSWERS = $_POST["diff_amount_of_answers"];
     $ALLOW_DUP = $_POST["allow_dup"];
 
+    $counter = 0;
+
     $question_id = 0;
     $db = new MysqliDb ('mysql', 'root', 'root', 'test');
     $db->autoReconnect = false;
@@ -57,6 +59,7 @@ function parseNodes($nodes) {
     $test_id = $db->insert ('tests', $new_test);
 
     $_answers = 0;
+    $ignore = false;
     foreach ($nodes->childNodes AS $item) {
         $node_value = trim($item->nodeValue);
         if (empty($node_value)) {
@@ -75,7 +78,7 @@ function parseNodes($nodes) {
             }
 
             if ($question_id !== 0  && intval($NUM_ANSWERS) !== $_answers) {
-                echo "<br>Error, la pregunta con identificador ".$question_id." tiene un número erroneo de respustas</br>";
+                echo "<br>Error, la pregunta " . $counter . " con identificador ".$question_id." tiene un número erroneo de respuestas</br>";
             }
 
             //Insert question
@@ -84,54 +87,66 @@ function parseNodes($nodes) {
             $question_text = preg_replace($patrón, '', $node_value); //eliminar numeración del documento
 
             $cols = Array ("id", "question");
-            $db->where ('question', $node_value);
+            $db->where ('question', $question_text);
             $alredy_exist_question = $db->get ("questions", null, $cols);
 
             if ($alredy_exist_question && count($alredy_exist_question) > 0){
                 echo "<br>Error, la pregunta ".$node_value." ya existe en la bd.</br>";
+                if (!$ALLOW_DUP) {
+                    $ignore = true;
+                    continue;
+                }
+            }else{
+                $ignore = false;
+            }
+
+            if(!$ignore){
+                $new_question = Array (
+                    "test_id" => $test_id,
+                    "question" => $question_text,
+                    "type" => $TYPE
+                );
+                $question_id = $db->insert ('questions', $new_question);
+                $counter++;
+                $_answers = 0;
             }
 
 
-            $new_question = Array (
-                "test_id" => $test_id,
-                "question" => $question_text,
-                "type" => $TYPE
-            );
-            $question_id = $db->insert ('questions', $new_question);
-            $_answers = 0;
         } else {
-            //Insert answer
+            if(!$ignore){
+                //Insert answer
 
-            //type a)
-            $re = '/^[a-zA-Z]\)/m';
-            $node_value = trim(preg_replace($re, "", $node_value));
-            //preg_match_all($re, $node_value, $matchesAnswer, PREG_SET_ORDER, 0);
+                //type a)
+                $re = '/^[a-zA-Z]\)/m';
+                $node_value = trim(preg_replace($re, "", $node_value));
+                //preg_match_all($re, $node_value, $matchesAnswer, PREG_SET_ORDER, 0);
 
-            //type a.
-            $re = '/^[a-zA-Z]\./m';
-            $node_value = trim(preg_replace($re, "", $node_value));
-            //preg_match_all($re, $node_value, $matchesAnswer, PREG_SET_ORDER, 0);
+                //type a.
+                $re = '/^[a-zA-Z]\./m';
+                $node_value = trim(preg_replace($re, "", $node_value));
+                //preg_match_all($re, $node_value, $matchesAnswer, PREG_SET_ORDER, 0);
 
-            if ($matchesAnswer || $matchesAnswer || $DIFF_AMOUNT_OF_ANSWERS == 1) {
-                $_answers++;
+                if ($matchesAnswer || $matchesAnswer || $DIFF_AMOUNT_OF_ANSWERS == 1) {
+                    $_answers++;
 
-                $new = new DomDocument;
-                $new->appendChild($new->importNode($item, true));
-                $xpath = new DomXPath($new);
-                $highlight_ar = $xpath->query("//w:highlight");
-                $highlight_ar2 = $xpath->query("//w:shd");
+                    $new = new DomDocument;
+                    $new->appendChild($new->importNode($item, true));
+                    $xpath = new DomXPath($new);
+                    $highlight_ar = $xpath->query("//w:highlight");
+                    $highlight_ar2 = $xpath->query("//w:shd");
 
-                $highlight = 0;
-                if(($highlight_ar && count($highlight_ar) > 0) || ($highlight_ar2 && count($highlight_ar2) > 0) ){
-                    $highlight = 1;
+                    $highlight = 0;
+                    if(($highlight_ar && count($highlight_ar) > 0) || ($highlight_ar2 && count($highlight_ar2) > 0) ){
+                        $highlight = 1;
+                    }
+
+                    $new_answer = Array (
+                        "answer" => $node_value,
+                        "question_id" => $question_id,
+                        "correct" => $highlight
+                    );
+                    $answer_id = $db->insert ('answers', $new_answer);
                 }
-
-                $new_answer = Array (
-                    "answer" => $node_value,
-                    "question_id" => $question_id,
-                    "correct" => $highlight
-                );
-                $answer_id = $db->insert ('answers', $new_answer);
             }
 
         }
